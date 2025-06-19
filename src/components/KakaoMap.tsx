@@ -29,7 +29,6 @@ const KakaoMap = () => {
 
 
 
-  
   useEffect(() => {
     loadKakaoMapScript().then(() => {
       window.kakao.maps.load(() => {
