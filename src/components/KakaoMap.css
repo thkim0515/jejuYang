@@ -1,0 +1,42 @@
+@media (max-width: 600px) {
+  .sideAreaCloseButton {
+    display: none; /* 모바일에서는 숨김 */
+  }
+
+  .sideAreaFooterClose {
+    display: block;
+    margin-top: 20px;
+    background: #eee;
+    color: #333;
+    padding: 10px 24px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s ease-in-out;
+  }
+
+  .side-area {
+    width: 100%;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 24px 16px;
+  }
+}
+
+@media (min-width: 601px) {
+  .sideAreaFooterClose {
+    display: none; /* 데스크톱에서는 하단 닫기 숨김 */
+  }
+
+  .sideAreaCloseButton {
+    display: block !important;  /* ✅ 추가: 데스크톱에서 X 버튼 보이기 */
+  }
+
+  .side-area {
+    width: 400px;
+    min-width: 400px;
+    max-width: 400px;
+  }
+}
