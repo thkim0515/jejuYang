@@ -26,11 +26,8 @@ const KakaoMap = () => {
       document.head.appendChild(script);
     });
   };
-  
-  useEffect(() => {
-    console.log("✅ KAKAO JS KEY:", process.env.REACT_APP_KAKAO_JS_KEY);
-    console.log("✅ KAKAO REST KEY:", process.env.REACT_APP_KAKAO_REST_KEY);
-  }, []);
+
+
 
   
   useEffect(() => {
