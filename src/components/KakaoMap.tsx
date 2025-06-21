@@ -1,17 +1,58 @@
 import React, { useEffect, useRef, useState } from "react";
-import { fetchLocations, Location } from "../utils/fetchLocation";
+import { fetchLocations, Location as RawLocation } from "../utils/fetchLocation";
 import listData from "../data/list.json";
 import "./KakaoMap.css";
 
-const { travelList, cafeList, days } = listData;
+import markerRed from "../assets/markerColor/markerred.png";
+import markerOrange from "../assets/markerColor/markerorange.png";
+import markerYellow from "../assets/markerColor/markeryellow.png";
+import markerGreen from "../assets/markerColor/markergreen.png";
+import markerBlue from "../assets/markerColor/markerblue.png";
+
+type DayKey = "day1" | "day2" | "day3" | "day4" | "day5";
+
+interface ListData {
+  travelList: string[];
+  cafeList: string[];
+  days: Record<DayKey, string[]>;
+}
+
+interface Location extends RawLocation {
+  dayKey?: DayKey;
+}
+
+const { travelList, cafeList, days }: ListData = listData;
+
+const orderedDays: DayKey[] = ["day1", "day2", "day3", "day4", "day5"];
+
+const markerIcons: Record<DayKey, string> = {
+  day1: markerRed,
+  day2: markerOrange,
+  day3: markerYellow,
+  day4: markerGreen,
+  day5: markerBlue,
+};
+
+const getTitleDayMap = (): Record<string, DayKey> => {
+  const map: Record<string, DayKey> = {};
+  for (const day of orderedDays) {
+    for (const title of days[day]) {
+      if (!map[title]) {
+        map[title] = day;
+      }
+    }
+  }
+  return map;
+};
 
 const KakaoMap = () => {
-  const [selectedCategory, setSelectedCategory] = useState<"all" | "travel" | "cafe" | "day1" | "day2" | "day3" | "day4" | "day5">("travel");
+  const [selectedCategory, setSelectedCategory] = useState<"all" | "travel" | "cafe" | DayKey>("travel");
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [isKakaoLoaded, setIsKakaoLoaded] = useState(false);
-  const [mapInstance, setMapInstance] = useState<any>(null);
   const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstance = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
 
   const buttonBackgrounds: Record<string, string> = {
     travel: "white",
@@ -41,65 +82,88 @@ const KakaoMap = () => {
   useEffect(() => {
     loadKakaoMapScript().then(() => {
       window.kakao.maps.load(() => {
-        let list: string[] = [];
-
-        if (selectedCategory === "travel") {
-          list = travelList;
-        } else if (selectedCategory === "cafe") {
-          list = cafeList;
-        } else if (selectedCategory === "all") {
-          list = Object.values(days).flat();
-        } else {
-          list = days[selectedCategory] || [];
+        if (mapRef.current && !mapInstance.current) {
+          mapInstance.current = new window.kakao.maps.Map(mapRef.current, {
+            center: new window.kakao.maps.LatLng(33.3617, 126.5292),
+            level: 10,
+          });
         }
-
-        fetchLocations(list).then(setLocations);
       });
     });
-  }, [selectedCategory]);
+  }, []);
 
   useEffect(() => {
-    if (!isKakaoLoaded || !mapRef.current || locations.length === 0) return;
+    if (!isKakaoLoaded) return;
 
-    window.kakao.maps.load(() => {
-      const map = new window.kakao.maps.Map(mapRef.current, {
-        center: new window.kakao.maps.LatLng(33.3617, 126.5292),
-        level: 10,
+    let list: string[] = [];
+
+    if (selectedCategory === "all") {
+      const uniqueTitles = Array.from(new Set(orderedDays.flatMap((day) => days[day])));
+      const titleDayMap = getTitleDayMap();
+
+      fetchLocations(uniqueTitles).then((results) => {
+        const withDay = results.map((loc) => ({
+          ...loc,
+          dayKey: titleDayMap[loc.title],
+        }));
+        setLocations(withDay);
+      });
+    } else {
+      if (selectedCategory === "travel") list = travelList;
+      else if (selectedCategory === "cafe") list = cafeList;
+      else list = days[selectedCategory] || [];
+
+      fetchLocations(list).then((results) => {
+        const withDay = results.map((loc) => ({
+          ...loc,
+          dayKey: selectedCategory as DayKey,
+        }));
+        setLocations(withDay);
+      });
+    }
+  }, [selectedCategory, isKakaoLoaded]);
+
+  useEffect(() => {
+    if (!mapInstance.current) return;
+
+    // 기존 마커 제거
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
+
+    locations.forEach((loc) => {
+      const markerPosition = new window.kakao.maps.LatLng(loc.lat, loc.lng);
+      const imageSrc = loc.dayKey ? markerIcons[loc.dayKey] : undefined;
+      const markerImage = imageSrc ? new window.kakao.maps.MarkerImage(imageSrc, new window.kakao.maps.Size(30, 42)) : undefined;
+
+      const marker = new window.kakao.maps.Marker({
+        map: mapInstance.current,
+        position: markerPosition,
+        image: markerImage,
       });
 
-      setMapInstance(map);
+      markersRef.current.push(marker);
 
-      locations.forEach((loc) => {
-        const markerPosition = new window.kakao.maps.LatLng(loc.lat, loc.lng);
+      const infoWindow = new window.kakao.maps.InfoWindow({
+        content: `<div style="padding:6px 12px;font-size:13px;">${loc.title}</div>`,
+      });
 
-        const marker = new window.kakao.maps.Marker({
-          map,
-          position: markerPosition,
-        });
-
-        const infoWindow = new window.kakao.maps.InfoWindow({
-          content: `<div style="padding:6px 12px;font-size:13px;">${loc.title}</div>`,
-        });
-
-        window.kakao.maps.event.addListener(marker, "mouseover", () => infoWindow.open(map, marker));
-        window.kakao.maps.event.addListener(marker, "mouseout", () => infoWindow.close());
-        window.kakao.maps.event.addListener(marker, "click", () => {
-          setSelectedLocation(loc);
-          const projection = map.getProjection();
-          const point = projection.containerPointFromCoords(markerPosition);
-          const sidebarWidth = 400;
-          point.x += sidebarWidth / 2;
-          const newCenter = projection.coordsFromContainerPoint(point);
-          map.setCenter(newCenter);
-        });
+      window.kakao.maps.event.addListener(marker, "mouseover", () => infoWindow.open(mapInstance.current, marker));
+      window.kakao.maps.event.addListener(marker, "mouseout", () => infoWindow.close());
+      window.kakao.maps.event.addListener(marker, "click", () => {
+        setSelectedLocation(loc);
+        const projection = mapInstance.current.getProjection();
+        const point = projection.containerPointFromCoords(markerPosition);
+        point.x += 200;
+        const newCenter = projection.coordsFromContainerPoint(point);
+        mapInstance.current.setCenter(newCenter);
       });
     });
-  }, [isKakaoLoaded, locations, selectedCategory]);
+  }, [locations]);
 
   const handleClose = () => {
     setSelectedLocation(null);
-    if (mapInstance) {
-      mapInstance.setCenter(new window.kakao.maps.LatLng(33.3617, 126.5292));
+    if (mapInstance.current) {
+      mapInstance.current.setCenter(new window.kakao.maps.LatLng(33.3617, 126.5292));
     }
   };
 
@@ -156,17 +220,13 @@ const KakaoMap = () => {
             className="side-area"
             style={{
               background: "linear-gradient(120deg, #fff, #eaf7ff 85%)",
-              padding: "30px 24px 24px 24px",
+              padding: "30px 24px",
               borderRight: "2px solid #e1eaf5",
               overflowY: "auto",
-              overflowX: "hidden",
               borderRadius: "0 18px 18px 0",
               display: "flex",
               flexDirection: "column",
-              alignItems: "stretch",
               gap: "20px",
-              marginBottom: "22px",
-              boxSizing: "border-box",
               position: "relative",
             }}
           >
@@ -185,23 +245,11 @@ const KakaoMap = () => {
                 cursor: "pointer",
                 color: "#aaa",
               }}
-              aria-label="닫기"
             >
               ×
             </button>
 
-            <h3
-              style={{
-                margin: "0 0 10px 0",
-                color: "#2a3c60",
-                fontWeight: 800,
-                fontSize: "1.36rem",
-                textAlign: "left",
-                width: "100%",
-              }}
-            >
-              {selectedLocation.title}
-            </h3>
+            <h3 style={{ color: "#2a3c60", fontWeight: 800, fontSize: "1.36rem" }}>{selectedLocation.title}</h3>
 
             {selectedLocation.thumbnail && (
               <img
@@ -216,14 +264,14 @@ const KakaoMap = () => {
               />
             )}
 
-            <p style={{ margin: 0, color: "#577087", fontSize: "1.07rem" }}>
+            <p style={{ color: "#577087", fontSize: "1.07rem" }}>
               <strong>카테고리:</strong> {selectedLocation.description}
             </p>
-            <p style={{ margin: 0, color: "#577087", fontSize: "1.07rem" }}>
+            <p style={{ color: "#577087", fontSize: "1.07rem" }}>
               <strong>주소:</strong> {selectedLocation.roadAddress || selectedLocation.address}
             </p>
             {selectedLocation.phone && (
-              <p style={{ margin: 0, color: "#577087", fontSize: "1.07rem" }}>
+              <p style={{ color: "#577087", fontSize: "1.07rem" }}>
                 <strong>전화:</strong> {selectedLocation.phone}
               </p>
             )}
@@ -246,20 +294,9 @@ const KakaoMap = () => {
             >
               카카오 장소보기
             </a>
-
-            <button onClick={handleClose}>닫기</button>
           </div>
         )}
-
-        <div
-          ref={mapRef}
-          style={{
-            flex: 1,
-            border: "none",
-            marginLeft: selectedLocation ? "0" : "0",
-            borderRadius: selectedLocation ? "0 0 0 18px" : "0",
-          }}
-        />
+        <div ref={mapRef} style={{ flex: 1 }} />
       </div>
     </div>
   );
