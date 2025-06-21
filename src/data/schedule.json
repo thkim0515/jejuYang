@@ -1,0 +1,256 @@
+{
+  "day1": [
+    {
+      "place": "제주공항",
+      "travelTime": "-",
+      "stayTime": "-",
+      "arrival": "15:30",
+      "departure": "16:20"
+    },
+    {
+      "place": "도두동 무지개 해안도로",
+      "travelTime": "10분",
+      "stayTime": "30분",
+      "arrival": "15:30",
+      "departure": "17:00"
+    },
+    {
+      "place": "선물공항 제주소품샵 공항점",
+      "travelTime": "10분",
+      "stayTime": "30분",
+      "arrival": "17:10",
+      "departure": "17:40"
+    },
+    {
+      "place": "용두암",
+      "travelTime": "10분",
+      "stayTime": "30분",
+      "arrival": "17:50",
+      "departure": "18:20"
+    },
+    {
+      "place": "용연구름다리",
+      "travelTime": "10분",
+      "stayTime": "30분",
+      "arrival": "18:30",
+      "departure": "19:00"
+    },
+    {
+      "place": "바이제주",
+      "travelTime": "10분",
+      "stayTime": "1시간 10분",
+      "arrival": "19:10",
+      "departure": "20:20"
+    }
+  ],
+  "day2": [
+    {
+      "place": "서귀피안 베이커리",
+      "travelTime": "-",
+      "stayTime": "45분",
+      "arrival": "8:00",
+      "departure": "8:30"
+    },
+    {
+      "place": "해밀리 카페",
+      "travelTime": "10분",
+      "stayTime": "45분",
+      "arrival": "9:00",
+      "departure": "9:30"
+    },
+    {
+      "place": "성산항 (배편 준비)",
+      "travelTime": "-",
+      "stayTime": "15분",
+      "arrival": "9:30",
+      "departure": "9:45"
+    },
+    {
+      "place": "우도 천진항",
+      "travelTime": "10분",
+      "stayTime": "사이드카 대여",
+      "arrival": "10:00",
+      "departure": "-"
+    },
+    {
+      "place": "서빈백사 해수욕장",
+      "travelTime": "15분",
+      "stayTime": "1시간",
+      "arrival": "10:30",
+      "departure": "12:00"
+    },
+    {
+      "place": "우도올레보트",
+      "travelTime": "10분",
+      "stayTime": "1시간",
+      "arrival": "12:30",
+      "departure": "13:30"
+    },
+    {
+      "place": "망루등대",
+      "travelTime": "10분",
+      "stayTime": "30분",
+      "arrival": "13:40",
+      "departure": "14:10"
+    },
+    {
+      "place": "하수고동 해변",
+      "travelTime": "15분",
+      "stayTime": "30분",
+      "arrival": "14:20",
+      "departure": "14:50"
+    },
+    {
+      "place": "온오프",
+      "travelTime": "5분",
+      "stayTime": "45분",
+      "arrival": "15:00",
+      "departure": "15:45"
+    },
+    {
+      "place": "3개 카페",
+      "travelTime": "-",
+      "stayTime": "15분",
+      "arrival": "16:00",
+      "departure": "16:15"
+    },
+    {
+      "place": "달그리안",
+      "travelTime": "10분",
+      "stayTime": "45분",
+      "arrival": "16:25",
+      "departure": "17:05"
+    },
+    {
+      "place": "천진낭만",
+      "travelTime": "15분",
+      "stayTime": "사이드카 반납",
+      "arrival": "17:20",
+      "departure": "18:00"
+    }
+  ],
+  "day3": [
+    {
+      "place": "뷰 제주 하늘",
+      "travelTime": "20분",
+      "stayTime": "1시간",
+      "arrival": "8시 50분",
+      "departure": "9시 50분"
+    },
+    {
+      "place": "낙타 트레킹",
+      "travelTime": "20분",
+      "stayTime": "1시간",
+      "arrival": "10시",
+      "departure": "11시"
+    },
+    {
+      "place": "녹차 동굴",
+      "travelTime": "20분",
+      "stayTime": "1시간",
+      "arrival": "11시 30분",
+      "departure": "12시 30분"
+    },
+    {
+      "place": "서귀피안 브런치 베이커리",
+      "travelTime": "20분",
+      "stayTime": "30분",
+      "arrival": "12시 50분",
+      "departure": "13시 20분"
+    },
+    {
+      "place": "서귀포 유람선",
+      "travelTime": "10분",
+      "stayTime": "1시간 30분",
+      "arrival": "14시",
+      "departure": "15시 30분"
+    },
+    {
+      "place": "소랑 ATV",
+      "travelTime": "20분",
+      "stayTime": "1시간",
+      "arrival": "15시 50분",
+      "departure": "16시 50분"
+    },
+    {
+      "place": "쇠소깍",
+      "travelTime": "20분",
+      "stayTime": "1시간 30분",
+      "arrival": "17시 10분",
+      "departure": "18시 40분"
+    },
+    {
+      "place": "꺼멍목장",
+      "travelTime": "30분",
+      "stayTime": "1시간",
+      "arrival": "19시",
+      "departure": "20시"
+    },
+    {
+      "place": "제주삼방산탄산온천",
+      "travelTime": "20분",
+      "stayTime": "1시간 30분",
+      "arrival": "20시 10분",
+      "departure": "21시 40분"
+    }
+  ],
+  "day4": [],
+  "day5": [
+    {
+      "place": "제주공항 인근 출발",
+      "travelTime": "-",
+      "stayTime": "-",
+      "arrival": "9:00",
+      "departure": "-"
+    },
+    {
+      "place": "언더워터클레이 함덕점",
+      "travelTime": "20분",
+      "stayTime": "1시간",
+      "arrival": "9:20",
+      "departure": "10:20"
+    },
+    {
+      "place": "함덕해수욕장",
+      "travelTime": "5분",
+      "stayTime": "2시간 30분",
+      "arrival": "10:25",
+      "departure": "12:55"
+    },
+    {
+      "place": "파인더 웨이브",
+      "travelTime": "5분",
+      "stayTime": "30분",
+      "arrival": "13:00",
+      "departure": "13:30"
+    },
+    {
+      "place": "갈치옥 함덕",
+      "travelTime": "15분",
+      "stayTime": "1시간",
+      "arrival": "13:45",
+      "departure": "14:45"
+    },
+    {
+      "place": "델문도",
+      "travelTime": "20분",
+      "stayTime": "1시간",
+      "arrival": "15:05",
+      "departure": "16:05"
+    },
+    {
+      "place": "서우봉 둘레길",
+      "travelTime": "15분",
+      "stayTime": "1시간",
+      "arrival": "16:20",
+      "departure": "17:20"
+    },
+    {
+      "place": "제주공항",
+      "travelTime": "25분",
+      "stayTime": "1시간",
+      "arrival": "17:45",
+      "departure": "18:45"
+    }
+  ]
+}
