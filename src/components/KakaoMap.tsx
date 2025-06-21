@@ -61,7 +61,6 @@ const getTitleDayMap = (): Record<string, DayKey> => {
   return map;
 };
 
-// ✅ 한라산을 "실제로 보이는 지도 영역의 중심"으로 이동
 const moveHallasanToVisibleCenter = (map: any, leftOffset = 0, bottomOffset = 0) => {
   if (!map || !window.kakao) return;
 
@@ -87,7 +86,6 @@ const KakaoMap = () => {
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
   const markersRef = useRef<any[]>([]);
-  const isDayPanel = selectedDay && !selectedLocation;
 
   useEffect(() => {
     setSelectedCategory("travel");
@@ -116,6 +114,7 @@ const KakaoMap = () => {
 
   useEffect(() => {
     if (!map || !window.kakao) return;
+
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
@@ -143,15 +142,16 @@ const KakaoMap = () => {
     });
 
     markersRef.current = newMarkers;
-    return () => newMarkers.forEach((m) => m.setMap(null));
-  }, [locations, map]);
 
-  // ✅ 한라산 중심 재조정
+    return () => newMarkers.forEach((m) => m.setMap(null));
+  }, [locations, map, selectedCategory]);
+
   useEffect(() => {
     if (!map || !window.kakao) return;
 
     const isMobile = window.innerWidth <= 600;
     const bottomOffset = isMobile ? panelRef.current?.offsetHeight || 0 : 0;
+    const isDayPanel = selectedDay && !selectedLocation;
     const leftOffset = !isMobile ? (isDayPanel ? 480 : 350) : 0;
 
     if (selectedDay || selectedLocation) {
