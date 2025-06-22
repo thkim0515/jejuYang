@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import { fetchLocations, Location as RawLocation } from "@/utils/fetchLocation";
-import listData from "@/../public/data/list.json";
-import scheduleDataRaw from "@/../public/data/schedule.json";
+import { fetchListData, fetchScheduleData } from "@/utils/api";
 import { useKakaoMap } from "@/hooks/useKakaoMap";
+import { convertTo24Hour, isCurrentTimeInRange, getTitleDayMap, moveHallasanToVisibleCenter } from "@/utils/timeUtils";
+import type { DayKey } from "@/utils/timeUtils";
 
 import "@/components/KakaoMap.css";
-
-type DayKey = "day1" | "day2" | "day3" | "day4" | "day5";
 
 interface ScheduleEntry {
   place: string;
@@ -24,8 +23,6 @@ interface Location extends RawLocation {
   dayKey?: DayKey;
 }
 
-const { travelList, cafeList, days } = listData;
-const scheduleData = scheduleDataRaw as ScheduleData;
 const orderedDays: DayKey[] = ["day1", "day2", "day3", "day4", "day5"];
 
 const markerIcons: Record<DayKey, string> = {
@@ -36,39 +33,9 @@ const markerIcons: Record<DayKey, string> = {
   day5: "/assets/markerColor/markerblue.png",
 };
 
-const convertTo24Hour = (time: string) => {
-  if (!time.includes("AM") && !time.includes("PM")) return time;
-  const [h, mMeridiem] = time.split(":");
-  const minute = mMeridiem.slice(0, 2);
-  const meridiem = mMeridiem.slice(2).toUpperCase();
-  let hour = parseInt(h);
-  if (meridiem === "PM" && hour !== 12) hour += 12;
-  if (meridiem === "AM" && hour === 12) hour = 0;
-  return `${hour.toString().padStart(2, "0")}:${minute}`;
-};
-
-const getTitleDayMap = (): Record<string, DayKey> => {
-  const map: Record<string, DayKey> = {};
-  for (const day of orderedDays) {
-    for (const title of days[day]) {
-      map[title] = day;
-    }
-  }
-  return map;
-};
-
-const moveHallasanToVisibleCenter = (map: any, leftOffset = 0, bottomOffset = 0) => {
-  if (!map || !window.kakao) return;
-  const hallasan = new window.kakao.maps.LatLng(33.3617, 126.5292);
-  const proj = map.getProjection();
-  const pt = proj.containerPointFromCoords(hallasan);
-  pt.x += leftOffset / 2;
-  pt.y -= bottomOffset / 2;
-  const adjusted = proj.coordsFromContainerPoint(pt);
-  map.setCenter(adjusted);
-};
-
 export default function KakaoMap() {
+  const [, setNow] = useState(new Date());
+
   const mapRef = useRef<HTMLDivElement>(null!);
   const panelRef = useRef<HTMLDivElement>(null);
   const { map, isLoaded } = useKakaoMap(mapRef);
@@ -77,35 +44,57 @@ export default function KakaoMap() {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
+  const [travelList, setTravelList] = useState<string[]>([]);
+  const [cafeList, setCafeList] = useState<string[]>([]);
+  const [days, setDays] = useState<Record<DayKey, string[]> | null>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleData>({} as ScheduleData);
   const markersRef = useRef<any[]>([]);
 
   useEffect(() => {
-    setSelectedCategory("travel");
-    setSelectedLocation(null);
-    setSelectedDay(null);
+    const interval = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    let titles: string[] = [];
-    if (selectedCategory === "all") {
-      titles = Array.from(new Set(orderedDays.flatMap((d) => days[d])));
-      const dayMap = getTitleDayMap();
-      fetchLocations(titles).then((res) =>
-        setLocations(res.map((l) => ({ ...l, dayKey: dayMap[l.title] })))
-      );
-    } else {
-      const titles =
-        selectedCategory === "travel"
-          ? travelList
-          : selectedCategory === "cafe"
-          ? cafeList
-          : days[selectedCategory];
-      fetchLocations(titles).then((res) =>
-        setLocations(res.map((l) => ({ ...l, dayKey: selectedCategory as DayKey })))
-      );
+    async function loadInitialData() {
+      const list = await fetchListData();
+      console.log(list)
+      const schedule = await fetchScheduleData();
+      setTravelList(list.travelList);
+      setCafeList(list.cafeList);
+      setDays(list.days);
+      setScheduleData(schedule);
     }
-  }, [selectedCategory, isLoaded]);
+
+    loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (!days) return;
+    setSelectedCategory("travel");
+    setSelectedLocation(null);
+    setSelectedDay(null);
+  }, [days]);
+
+  useEffect(() => {
+    if (!isLoaded || !days || Object.keys(days).length === 0) return;
+
+    let titles: string[] = [];
+
+    if (selectedCategory === "all") {
+      titles = Array.from(new Set(orderedDays.flatMap((d) => days[d] || [])));
+      
+      const dayMap = getTitleDayMap(days);
+      fetchLocations(titles).then((res) => setLocations(res.map((l) => ({ ...l, dayKey: dayMap[l.title] }))));
+    } else {
+      if (selectedCategory === "travel" || selectedCategory === "cafe" || (orderedDays.includes(selectedCategory) && days[selectedCategory])) {
+        titles = selectedCategory === "travel" ? travelList : selectedCategory === "cafe" ? cafeList : days[selectedCategory] || [];
+
+        fetchLocations(titles).then((res) => setLocations(res.map((l) => ({ ...l, dayKey: selectedCategory as DayKey }))));
+      }
+    }
+  }, [selectedCategory, isLoaded, days]);
+  
 
   useEffect(() => {
     if (!map || !window.kakao) return;
@@ -115,11 +104,7 @@ export default function KakaoMap() {
     const newMarkers = locations.map((loc) => {
       const pos = new window.kakao.maps.LatLng(loc.lat, loc.lng);
       const image = new window.kakao.maps.MarkerImage(
-        selectedCategory === "travel" || selectedCategory === "cafe"
-          ? "/assets/markerColor/markernormal.png"
-          : loc.dayKey
-          ? markerIcons[loc.dayKey]
-          : "/assets/markerColor/markernormal.png",
+        selectedCategory === "travel" || selectedCategory === "cafe" ? "/assets/markerColor/markernormal.png" : loc.dayKey ? markerIcons[loc.dayKey] : "/assets/markerColor/markernormal.png",
         new window.kakao.maps.Size(30, 42)
       );
 
@@ -175,9 +160,11 @@ export default function KakaoMap() {
               setSelectedCategory(key as typeof selectedCategory);
               if (key.startsWith("day")) {
                 setSelectedDay(key as DayKey);
+                console.log(selectedDay)
                 setSelectedLocation(null);
               } else {
                 setSelectedDay(null);
+                console.log(selectedDay);
               }
             }}
             className={selectedCategory === key ? "active-category" : ""}
@@ -201,7 +188,9 @@ export default function KakaoMap() {
       <div style={{ display: "flex", height: "calc(100vh - 66px)", position: "relative" }}>
         {(selectedLocation || selectedDay) && (
           <div ref={panelRef} className="side-panel">
-            <button className="sideAreaCloseButton" onClick={handleClose}>×</button>
+            <button className="sideAreaCloseButton" onClick={handleClose}>
+              ×
+            </button>
 
             {selectedLocation && (
               <>
@@ -209,15 +198,21 @@ export default function KakaoMap() {
                 {selectedLocation.thumbnail && (
                   <img src={selectedLocation.thumbnail} alt={selectedLocation.title} style={{ width: "100%", height: "180px", objectFit: "cover", borderRadius: "12px" }} />
                 )}
-                <p><strong>카테고리:</strong> {selectedLocation.description}</p>
-                <p><strong>주소:</strong> {selectedLocation.roadAddress || selectedLocation.address}</p>
+                <p>
+                  <strong>카테고리:</strong> {selectedLocation.description}
+                </p>
+                <p>
+                  <strong>주소:</strong> {selectedLocation.roadAddress || selectedLocation.address}
+                </p>
                 {selectedLocation.phone && (
-                  <p><strong>전화:</strong> {selectedLocation.phone}</p>
+                  <p>
+                    <strong>전화:</strong> {selectedLocation.phone}
+                  </p>
                 )}
               </>
             )}
 
-            {selectedDay && (
+            {selectedDay && scheduleData[selectedDay] && (
               <>
                 <h3>{selectedDay.toUpperCase()} 일정표</h3>
                 <table className="schedule-table">
@@ -231,8 +226,8 @@ export default function KakaoMap() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(scheduleData[selectedDay] || []).map((item, idx) => (
-                      <tr key={idx}>
+                    {scheduleData[selectedDay].map((item, idx) => (
+                      <tr key={idx} className={isCurrentTimeInRange(item.arrival, item.departure) ? "highlight-row" : ""}>
                         <td title={item.place}>{item.place}</td>
                         <td>{item.travelTime}</td>
                         <td>{item.stayTime}</td>

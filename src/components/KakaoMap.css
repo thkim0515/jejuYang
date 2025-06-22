@@ -87,3 +87,7 @@
       box-sizing: border-box;
     }
   }
+
+  .highlight-row td {
+    background-color: #ffe66d !important;
+  }

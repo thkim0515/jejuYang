@@ -8,11 +8,14 @@ declare global {
   }
 }
 
+// 카카오맵을 초기화하고 로드하는 커스텀 훅입니다.
+// 주어진 mapRef를 사용하여 맵 인스턴스를 생성하고 로드 상태를 반환합니다.
 export const useKakaoMap = (mapRef: React.RefObject<HTMLDivElement>) => {
   const [loaded, setLoaded] = useState(false);
   const mapInstance = useRef<any>(null);
 
   useEffect(() => {
+    // 카카오맵 스크립트를 비동기로 로드합니다.
     const loadScript = (): Promise<void> => {
       return new Promise((resolve) => {
         if (typeof window === "undefined") return;

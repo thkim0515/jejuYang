@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+// 네비게이션 바를 렌더링하는 컴포넌트입니다.
+// 페이지 간의 빠른 이동을 위해 링크를 미리 로드합니다.
 export default function NavBar() {
   const router = useRouter();
 
