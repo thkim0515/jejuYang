@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { getMongoClient } from "@/lib/mongodb";
 
 export async function GET() {
-  const client = await clientPromise;
+  const client = await getMongoClient();
   const db = client.db("datecourse");
   const data = await db.collection("schedules").findOne({});
 
@@ -12,7 +12,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
     const body = await req.json(); // POST된 JSON 데이터
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("datecourse"); // 사용할 DB명
   
     const collection = db.collection("schedules");

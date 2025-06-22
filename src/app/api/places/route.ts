@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { getMongoClient } from "@/lib/mongodb";
 
 // GET 메서드 핸들러
 export async function GET() {
   try {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("datecourse"); // Atlas에서 설정한 DB 이름
     const places = await db.collection("places").find().toArray();
 

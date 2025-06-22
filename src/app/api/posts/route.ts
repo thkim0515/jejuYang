@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { getMongoClient } from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     }
 
     // MongoDB 연결 및 데이터 삽입
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("board");
     const posts = db.collection("posts");
     const result = await posts.insertOne({ category, title, content, date });
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
     try {
-      const client = await clientPromise;
+      const client = await getMongoClient();
       const db = client.db("board");
       const posts = await db.collection("posts")
         .find({})
