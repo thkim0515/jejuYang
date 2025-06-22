@@ -1,0 +1,111 @@
+/* 기본 전역 스타일 */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+  font-size: 16px;
+}
+
+/* 기존 App 클래스 → 필요 없으면 삭제 가능 */
+.App {
+  text-align: center;
+}
+
+/* 공통 nav 스타일 */
+nav {
+  background-color: #333;
+  padding: 10px 0;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul li {
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* 헤딩 스타일 */
+h2 {
+  color: #333;
+  margin-top: 20px;
+}
+
+/* 로고 애니메이션 관련 */
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 헤더 영역 스타일 */
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+/* 링크 스타일 */
+.App-link {
+  color: #61dafb;
+}
+
+/* 반응형 스타일 - 모바일 */
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+  .side-area {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+  }
+}
+
+/* 반응형 스타일 - 태블릿 */
+@media (min-width: 601px) and (max-width: 1024px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+/* 반응형 스타일 - 데스크탑 */
+@media (min-width: 1025px) {
+  body {
+    font-size: 16px;
+  }
+}

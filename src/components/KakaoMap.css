@@ -1,0 +1,89 @@
+.category-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 24px;
+    background: linear-gradient(90deg, #D0EFFF 0%, #F0F4FF 100%);
+    border-bottom: 2px solid #dae3ed;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    overflow-x: auto;
+  }
+  
+  .category-bar button {
+    font-weight: 600;
+    border: none;
+    border-radius: 40px;
+    padding: 10px 24px;
+    font-size: 15px;
+    cursor: pointer;
+    background: white;
+  }
+  
+  .category-bar .active-category {
+    background: linear-gradient(90deg, #61dafb 10%, #5eead4 90%);
+  }
+  
+  .side-panel {
+    background: white;
+    overflow-y: auto;
+    padding: 24px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sideAreaCloseButton {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 24px;
+    border: none;
+    background: transparent;
+    color: #aaa;
+    cursor: pointer;
+    z-index: 1001;
+  }
+  
+  .schedule-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    font-size: 14px;
+    margin-top: 16px;
+  }
+  
+  .schedule-table th,
+  .schedule-table td {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #d0d7e2;
+    background: white;
+  }
+  
+  .schedule-table th {
+    background-color: #e6efff;
+    color: #1c2b4d;
+  }
+  
+  @media screen and (min-width: 601px) {
+    .side-panel {
+      position: relative;
+      width: 480px;
+      height: 100%;
+    }
+  }
+  
+  @media screen and (max-width: 600px) {
+    .side-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      max-height: 60vh;
+      border-radius: 20px 20px 0 0;
+      padding: 20px;
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); /* ✅ 하단 침범 방지 */
+      box-sizing: border-box;
+    }
+  }
