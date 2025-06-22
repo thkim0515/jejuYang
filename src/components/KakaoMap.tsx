@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { fetchLocations, Location as RawLocation } from "@/utils/fetchLocation";
 import { fetchListData, fetchScheduleData } from "@/utils/api";
 import { useKakaoMap } from "@/hooks/useKakaoMap";
-import { convertTo24Hour, isCurrentTimeInRange, getTitleDayMap, moveHallasanToVisibleCenter } from "@/utils/timeUtils";
+import { convertTo24Hour, isCurrentTimeInHourRange, getTitleDayMap, moveHallasanToVisibleCenter } from "@/utils/timeUtils";
 import type { DayKey } from "@/utils/timeUtils";
 import "@/components/KakaoMap.css";
 
@@ -300,12 +300,12 @@ export default function KakaoMap() {
                   </thead>
                   <tbody>
                     {scheduleData[selectedDay].map((item, idx) => (
-                      <tr key={idx} className={isCurrentTimeInRange(item.arrival, item.departure) ? "highlight-row" : ""}>
+                      <tr key={idx} className={isCurrentTimeInHourRange(item.arrival, item.departure) ? "highlight-row" : ""}>
                         <td title={item.place}>{item.place}</td>
                         <td>{item.travelTime}</td>
                         <td>{item.stayTime}</td>
-                        <td>{convertTo24Hour(item.arrival)}</td>
-                        <td>{convertTo24Hour(item.departure)}</td>
+                        <td>{item.arrival}</td>
+                        <td>{item.departure}</td>
                       </tr>
                     ))}
                   </tbody>

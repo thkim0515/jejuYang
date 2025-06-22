@@ -2,31 +2,21 @@
 
 export type DayKey = "day1" | "day2" | "day3" | "day4" | "day5";
 
-// ✅ 기존 days import 삭제
-// import listData from "@/../public/data/list.json"; ❌
 
-export const convertTo24Hour = (time: string): string => {
-  if (!time.includes("AM") && !time.includes("PM")) return time;
-  const [h, mMeridiem] = time.split(":");
-  const minute = mMeridiem.slice(0, 2);
-  const meridiem = mMeridiem.slice(2).toUpperCase();
-  let hour = parseInt(h);
-  if (meridiem === "PM" && hour !== 12) hour += 12;
-  if (meridiem === "AM" && hour === 12) hour = 0;
-  return `${hour.toString().padStart(2, "0")}:${minute}`;
-};
+export const convertTo24Hour = (time: string): string => time;
 
-export const isCurrentTimeInRange = (arrival: string, departure: string): boolean => {
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+export const isCurrentTimeInHourRange = (arrival: string, departure: string): boolean => {
+  const nowHour = new Date().getHours();
 
-  const [aH, aM] = convertTo24Hour(arrival).split(":").map(Number);
-  const [dH, dM] = convertTo24Hour(departure).split(":").map(Number);
+  const arrivalHour = parseInt(arrival.split(":")[0], 10);
+  const departureHour = parseInt(departure.split(":")[0], 10);
 
-  const arrivalMin = aH * 60 + aM;
-  const departureMin = dH * 60 + dM;
+  // 예외 처리: 출발 < 도착이면 같은 시간 (예: 16:15 ~ 16:15 등)
+  if (arrivalHour === departureHour) {
+    return nowHour === arrivalHour;
+  }
 
-  return nowMinutes >= arrivalMin && nowMinutes <= departureMin;
+  return nowHour >= arrivalHour && nowHour <= departureHour;
 };
 
 export const getTitleDayMap = (days: Record<DayKey, string[]>): Record<string, DayKey> => {
