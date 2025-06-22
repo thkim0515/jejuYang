@@ -48,7 +48,7 @@ export const fetchLocations = async (list: string[]): Promise<Location[]> => {
         }
       })
       .catch((err) => {
-        console.error(`❌ ${place} 검색 실패`, err);
+        console.error(`${place} 검색 실패`, err);
         return null;
       })
   );
