@@ -175,7 +175,7 @@ export default function KakaoMap() {
     const timeout = setTimeout(() => {
       const isMobile = window.innerWidth <= 600;
       const baseBottomOffset = isMobile ? panelRef.current?.offsetHeight || 0 : 0;
-      const extraMobileOffset = isMobile ? -900 : 0;
+      const extraMobileOffset = isMobile ? -700 : 0;
       const bottomOffset = baseBottomOffset + extraMobileOffset;
       const leftOffset = !isMobile ? 480 : 0;
 
