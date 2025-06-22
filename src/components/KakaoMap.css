@@ -66,6 +66,10 @@
     color: #1c2b4d;
   }
   
+  .highlight-row td {
+    background-color: #ffe66d !important;
+  }
+
   @media screen and (min-width: 601px) {
     .side-panel {
       position: relative;
@@ -80,14 +84,23 @@
       bottom: 0;
       left: 0;
       width: 100vw;
-      max-height: 60vh;
+      height: 60vh;
       border-radius: 20px 20px 0 0;
       padding: 20px;
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); /* ✅ 하단 침범 방지 */
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
       box-sizing: border-box;
+  
+      transform: translateY(100%);
+      opacity: 0;
+      transition: transform 0.4s ease, opacity 0.3s ease;
+      pointer-events: none;
+    }
+  
+    .side-panel.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
     }
   }
+  
 
-  .highlight-row td {
-    background-color: #ffe66d !important;
-  }
