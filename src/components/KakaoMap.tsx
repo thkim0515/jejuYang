@@ -175,7 +175,7 @@ export default function KakaoMap() {
     const timeout = setTimeout(() => {
       const isMobile = window.innerWidth <= 600;
       const baseBottomOffset = isMobile ? panelRef.current?.offsetHeight || 0 : 0;
-      const extraMobileOffset = isMobile ? -1100 : 0;
+      const extraMobileOffset = isMobile ? -900 : 0;
       const bottomOffset = baseBottomOffset + extraMobileOffset;
       const leftOffset = !isMobile ? 480 : 0;
 
@@ -210,7 +210,8 @@ export default function KakaoMap() {
     <div style={{ width: "100%", minHeight: "100vh", background: "#f6f7fb" }}>
       {/* 카테고리 버튼 바 */}
       <div className="category-bar">
-        {["travel", "cafe", "all", ...orderedDays].map((key) => (
+        {["all", ...orderedDays].map((key) => (
+        // {["travel", "cafe", "all", ...orderedDays].map((key) => (
           <button
             key={key}
             onClick={() => {
@@ -231,8 +232,8 @@ export default function KakaoMap() {
           >
             {
               {
-                travel: "여행지 보기",
-                cafe: "카페 보기",
+                // travel: "여행지 보기",
+                // cafe: "카페 보기",
                 all: "전체 보기",
                 day1: "1일차",
                 day2: "2일차",
