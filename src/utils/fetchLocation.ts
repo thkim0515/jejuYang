@@ -18,7 +18,7 @@ const KAKAO_REST_KEY = process.env.NEXT_PUBLIC_KAKAO_REST_KEY;
 // 주어진 장소 목록을 카카오 API를 통해 검색하여 위치 정보를 반환합니다.
 export const fetchLocations = async (list: string[]): Promise<Location[]> => {
   if (!KAKAO_REST_KEY) {
-    console.error("❌ 환경변수 NEXT_PUBLIC_KAKAO_REST_KEY가 정의되어 있지 않습니다.");
+    console.error("환경변수 NEXT_PUBLIC_KAKAO_REST_KEY가 정의되어 있지 않습니다.");
     return [];
   }
 

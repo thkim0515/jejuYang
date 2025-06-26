@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { fetchLocations, Location as RawLocation } from "@/utils/fetchLocation";
-import { fetchListData, fetchScheduleData } from "@/utils/api";
+import { fetchListData, fetchScheduleData, fetchAccommodationData } from "@/utils/api";
 import { useKakaoMap } from "@/hooks/useKakaoMap";
 import { convertTo24Hour, isCurrentTimeInHourRange, getTitleDayMap, moveHallasanToVisibleCenter } from "@/utils/timeUtils";
 import type { DayKey } from "@/utils/timeUtils";
@@ -16,6 +16,17 @@ interface ScheduleEntry {
   arrival: string;
   departure: string;
 }
+
+interface Accommodation {
+  name: string;
+  link: string;
+  checkIn: string;
+  checkOut: string;
+  parking: string;
+  note: string;
+  day: DayKey;
+}
+
 
 // 일차별 스케줄 데이터 타입
 type ScheduleData = Record<DayKey, ScheduleEntry[]>;
@@ -38,6 +49,10 @@ const markerIcons: Record<DayKey, string> = {
 };
 
 export default function KakaoMap() {
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
+  const [accommodationLocations, setAccommodationLocations] = useState<Location[]>([]);
+
+  const [showAccommodation, setShowAccommodation] = useState(false);
   // 현재 시간 상태 (매분 갱신)
   const [, setNow] = useState(new Date());
 
@@ -79,6 +94,8 @@ export default function KakaoMap() {
     async function loadInitialData() {
       const list = await fetchListData();
       const schedule = await fetchScheduleData();
+      console.log(list)
+      console.log(schedule)
       setTravelList(list.travelList);
       setCafeList(list.cafeList);
       setDays(list.days);
@@ -86,6 +103,46 @@ export default function KakaoMap() {
     }
     loadInitialData();
   }, []);
+
+  useEffect(() => {
+    async function loadInitialData() {
+      const list = await fetchListData();
+      const schedule = await fetchScheduleData();
+      const acc = await fetchAccommodationData();
+      setTravelList(list.travelList);
+      setCafeList(list.cafeList);
+      setDays(list.days);
+      setScheduleData(schedule);
+      setAccommodations(acc);
+    }
+    loadInitialData();
+  }, []);
+
+  useEffect(() => {
+    async function fetchAllLocations() {
+      const acc: Accommodation[] = await fetchAccommodationData(); // 타입 명시
+      setAccommodations(acc);
+
+      // 숙소 이름만 추출 (타입 명시)
+      const accommodationNames: string[] = acc.map((a: Accommodation) => a.name);
+
+      // 기존 fetchLocations 재사용
+      const accLocs: Location[] = await fetchLocations(accommodationNames);
+
+      // 각 숙소에 dayKey 주입
+      const accWithDayKey: Location[] = accLocs.map((loc) => {
+        const accItem = acc.find((a: Accommodation) => a.name === loc.title);
+        return { ...loc, dayKey: accItem?.day };
+      });
+
+      setAccommodationLocations(accWithDayKey);
+    }
+    console.log(accommodationLocations);
+
+    fetchAllLocations();
+  }, []);
+  
+
 
   // days 데이터가 로드되면 기본 상태 초기화
   useEffect(() => {
@@ -122,24 +179,34 @@ export default function KakaoMap() {
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
 
-    const newMarkers = locations.map((loc) => {
+    const filteredAccommodationLocations = selectedDay ? accommodationLocations.filter((loc) => loc.dayKey === selectedDay) : accommodationLocations;
+
+    const allLocations = [...locations, ...filteredAccommodationLocations];
+
+    const newMarkers = allLocations.map((loc) => {
       const pos = new window.kakao.maps.LatLng(loc.lat, loc.lng);
 
-      // 카테고리에 따라 마커 이미지 선택
+      // 숙소 여부 확인
+      const isAccommodation = accommodations.some((a) => a.name === loc.title);
+
+      // 마커 이미지 설정
       const image = new window.kakao.maps.MarkerImage(
-        selectedCategory === "travel" || selectedCategory === "cafe" ? "/assets/markerColor/markernormal.png" : loc.dayKey ? markerIcons[loc.dayKey] : "/assets/markerColor/markernormal.png",
+        isAccommodation
+          ? "/assets/accmo/accomo.png" // 숙소용 마커 이미지
+          : selectedCategory === "travel" || selectedCategory === "cafe"
+          ? "/assets/markerColor/markernormal.png"
+          : loc.dayKey
+          ? markerIcons[loc.dayKey]
+          : "/assets/markerColor/markernormal.png",
         new window.kakao.maps.Size(30, 42)
       );
 
-      // 마커 생성
       const marker = new window.kakao.maps.Marker({ map, position: pos, image });
 
-      // 인포윈도우 설정
       const info = new window.kakao.maps.InfoWindow({
         content: `<div style="padding:6px 12px;font-size:13px;">${loc.title}</div>`,
       });
 
-      // 마커 이벤트 등록
       window.kakao.maps.event.addListener(marker, "mouseover", () => info.open(map, marker));
       window.kakao.maps.event.addListener(marker, "mouseout", () => info.close());
       window.kakao.maps.event.addListener(marker, "click", () => {
@@ -147,12 +214,13 @@ export default function KakaoMap() {
         setSelectedDay(null);
         const proj = map.getProjection();
         const pt = proj.containerPointFromCoords(pos);
-        pt.x += 200; // 사이드 패널 고려하여 오른쪽으로 이동
+        pt.x += 200;
         map.setCenter(proj.coordsFromContainerPoint(pt));
       });
 
       return marker;
     });
+
 
     // 마커 저장
     markersRef.current = newMarkers;
@@ -211,7 +279,7 @@ export default function KakaoMap() {
       {/* 카테고리 버튼 바 */}
       <div className="category-bar">
         {["all", ...orderedDays].map((key) => (
-        // {["travel", "cafe", "all", ...orderedDays].map((key) => (
+          // {["travel", "cafe", "all", ...orderedDays].map((key) => (
           <button
             key={key}
             onClick={() => {
@@ -284,11 +352,71 @@ export default function KakaoMap() {
                 )}
               </>
             )}
-
-            {/* 일차별 일정표 */}
+            {/* 일차별 숙소 */}
             {selectedDay && scheduleData[selectedDay] && (
               <>
-                <h3>{selectedDay.toUpperCase()} 일정표</h3>
+                {/* 상단 행: 일정표 제목 + 숙소 버튼 */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <h3 style={{ margin: 0 }}>{selectedDay.toUpperCase()} 일정표</h3>
+                  <button
+                    onClick={() => setShowAccommodation((prev) => !prev)}
+                    style={{
+                      padding: "6px 12px",
+                      background: "#1976d2",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {showAccommodation ? "숙소 정보 접기" : "🏨 숙소 정보 보기"}
+                  </button>
+                </div>
+
+                {/* 숙소 정보 테이블 */}
+                {showAccommodation &&
+                  accommodations
+                    .filter((a) => a.day === selectedDay)
+                    .map((a, i) => (
+                      <div key={i} style={{ marginTop: "20px" }}>
+                        <h4 style={{ marginBottom: "10px" }}>🏨 숙소 정보</h4>
+                        <table className="schedule-table">
+                          <thead>
+                            <tr>
+                              <th>이름</th>
+                              <th>체크인</th>
+                              <th>체크아웃</th>
+                              <th>주차</th>
+                              <th>비고</th>
+                              <th>예약링크</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>{a.name}</td>
+                              <td>{a.checkIn}</td>
+                              <td>{a.checkOut}</td>
+                              <td>{a.parking}</td>
+                              <td>{a.note}</td>
+                              <td>
+                                <a href={a.link} target="_blank" rel="noopener noreferrer">
+                                  바로가기
+                                </a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    ))}
+
+                {/* 일정표 테이블 */}
                 <table className="schedule-table">
                   <thead>
                     <tr>

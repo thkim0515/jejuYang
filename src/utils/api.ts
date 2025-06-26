@@ -10,3 +10,9 @@ export async function fetchScheduleData() {
   const res = await axios.get("/api/schedule");
   return res.data;
 }
+
+
+export async function fetchAccommodationData() {
+  const res = await axios.get("/api/accommodations");
+  return res.data?.list || [];
+}

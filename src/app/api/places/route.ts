@@ -1,3 +1,4 @@
+// src/app/api/places/route.ts
 import { NextResponse } from "next/server";
 import { getMongoClient } from "@/lib/mongodb";
 
@@ -5,7 +6,7 @@ import { getMongoClient } from "@/lib/mongodb";
 export async function GET() {
   try {
     const client = await getMongoClient();
-    const db = client.db("datecourse"); // Atlas에서 설정한 DB 이름
+    const db = client.db("Yang"); // 'datecourse'를 'Yang'으로 변경
     const places = await db.collection("places").find().toArray();
 
     return NextResponse.json({ places });

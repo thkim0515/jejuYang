@@ -23,12 +23,12 @@ export default function NavBar() {
             양이랑 제주 여행!
           </Link>
         </li>
-        {/* <li>
+        <li>
           <Link className="nav-link" href="/first">
             First
           </Link>
         </li>
-        <li>
+        {/* <li>
           <Link className="nav-link" href="/second">
             Second
           </Link>
