@@ -67,7 +67,7 @@ export default function KakaoMap() {
   const { map, isLoaded } = useKakaoMap(mapRef);
 
   // 현재 선택된 카테고리 및 선택 항목
-  const [selectedCategory, setSelectedCategory] = useState<"all" | "travel" | "cafe" | DayKey>("travel");
+  const [selectedCategory, setSelectedCategory] = useState<"all" | "travel" | "cafe" | DayKey>("all");
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [selectedDay, setSelectedDay] = useState<DayKey | null>(null);
 
@@ -147,7 +147,7 @@ export default function KakaoMap() {
   // days 데이터가 로드되면 기본 상태 초기화
   useEffect(() => {
     if (!days) return;
-    setSelectedCategory("travel");
+    setSelectedCategory("all");
     setSelectedLocation(null);
     setSelectedDay(null);
   }, [days]);
@@ -162,6 +162,7 @@ export default function KakaoMap() {
       // 전체 보기: 모든 일차 장소 병합 후 중복 제거
       titles = Array.from(new Set(orderedDays.flatMap((d) => days[d] || [])));
       const dayMap = getTitleDayMap(days);
+      console.log(dayMap)
       fetchLocations(titles).then((res) => setLocations(res.map((l) => ({ ...l, dayKey: dayMap[l.title] }))));
     } else {
       // 여행지, 카페, 혹은 특정 일차에 따른 장소 불러오기
@@ -185,20 +186,23 @@ export default function KakaoMap() {
 
     const newMarkers = allLocations.map((loc) => {
       const pos = new window.kakao.maps.LatLng(loc.lat, loc.lng);
-
       // 숙소 여부 확인
       const isAccommodation = accommodations.some((a) => a.name === loc.title);
 
       // 마커 이미지 설정
+      const markerSize = isAccommodation
+        ? new window.kakao.maps.Size(42, 46) // 숙소용 마커 크기: 더 넓게
+        : new window.kakao.maps.Size(30, 42); // 기본 마커 크기
+
       const image = new window.kakao.maps.MarkerImage(
         isAccommodation
-          ? "/assets/accmo/accomo.png" // 숙소용 마커 이미지
+          ? "/assets/accmo/accomo.png"
           : selectedCategory === "travel" || selectedCategory === "cafe"
           ? "/assets/markerColor/markernormal.png"
           : loc.dayKey
           ? markerIcons[loc.dayKey]
           : "/assets/markerColor/markernormal.png",
-        new window.kakao.maps.Size(30, 42)
+        markerSize
       );
 
       const marker = new window.kakao.maps.Marker({ map, position: pos, image });
