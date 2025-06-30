@@ -143,7 +143,6 @@ export default function KakaoMap() {
   }, []);
   
 
-
   // days 데이터가 로드되면 기본 상태 초기화
   useEffect(() => {
     if (!days) return;
